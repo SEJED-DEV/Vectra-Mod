@@ -13,6 +13,9 @@ module.exports = {
     // Basic warnings require moderate members permission
     warn: [PermissionFlagsBits.ModerateMembers],
 
+    // Kicking requires moderate members permission
+    kick: [PermissionFlagsBits.ModerateMembers],
+
     // Muting/Timeouts require moderate members permission
     mute: [PermissionFlagsBits.ModerateMembers],
 

@@ -11,6 +11,7 @@ const { resolveUser } = require('../utils/userResolver');
 const { getUserLogs } = require('../utils/jsonLogger');
 const { EmbedBuilder } = require('discord.js');
 const permissionsConfig = require('../config/permissions');
+const VISUALS = require('../config/visuals');
 
 module.exports = {
     name: 'modlogs',
@@ -20,7 +21,12 @@ module.exports = {
 
         // Advanced Permission Check for Log Access
         if (!message.member.permissions.has(permissionsConfig.viewLogs)) {
-            return message.reply('[UNAUTHORIZED] You lack the authority to view sensitive moderation logs.');
+            const securityEmbed = new EmbedBuilder()
+                .setTitle(`${VISUALS.emojis.security} Unauthorized Access`)
+                .setColor(VISUALS.colors.error)
+                .setDescription('You lack the authority to view sensitive moderation logs.')
+                .setFooter({ text: VISUALS.footer.text });
+            return message.reply({ embeds: [securityEmbed] });
         }
 
         const client = message.client;
@@ -28,7 +34,12 @@ module.exports = {
 
         const target = await resolveUser(client, targetQuery);
         if (!target) {
-            return message.channel.send('[ERROR] Unable to resolve target user.');
+            const errorEmbed = new EmbedBuilder()
+                .setTitle(`${VISUALS.emojis.error} Resolution Error`)
+                .setColor(VISUALS.colors.error)
+                .setDescription('Unable to resolve target user.')
+                .setFooter({ text: VISUALS.footer.text });
+            return message.channel.send({ embeds: [errorEmbed] });
         }
 
         try {
@@ -36,11 +47,16 @@ module.exports = {
             const logs = getUserLogs(target.id);
 
             if (logs.length === 0) {
-                return message.channel.send(`[INFO] No moderation records found for **${target.tag}**.`);
+                const infoEmbed = new EmbedBuilder()
+                    .setTitle(`${VISUALS.emojis.system} System Archive`)
+                    .setColor(VISUALS.colors.info)
+                    .setDescription(`No moderation records found for **${target.tag}**.`)
+                    .setFooter({ text: VISUALS.footer.text });
+                return message.channel.send({ embeds: [infoEmbed] });
             }
 
             const embed = new EmbedBuilder()
-                .setTitle(`Moderation History: ${target.tag}`)
+                .setTitle(`${VISUALS.emojis.infraction} Moderation History: ${target.tag}`)
                 .setColor(0x5865F2)
                 .setThumbnail(target.displayAvatarURL())
                 .setDescription(logs.slice(0, 10).map((log, index) => {
@@ -52,7 +68,12 @@ module.exports = {
 
         } catch (error) {
             console.error('\x1b[31m%s\x1b[0m', `[MODLOGS ERROR] Failed to fetch logs for ${target.id}:`, error.message);
-            return message.channel.send('[FATAL] Failed to retrieve logs from JSON pipeline.');
+            const errorEmbed = new EmbedBuilder()
+                .setTitle(`${VISUALS.emojis.error} Pipeline Error`)
+                .setColor(VISUALS.colors.error)
+                .setDescription('Failed to retrieve logs from the JSON pipeline.')
+                .setFooter({ text: VISUALS.footer.text });
+            return message.channel.send({ embeds: [errorEmbed] });
         }
     }
 };

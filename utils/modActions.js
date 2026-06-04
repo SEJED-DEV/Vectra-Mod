@@ -12,6 +12,8 @@
 
 const { logInfraction } = require('./jsonLogger');
 const permissionsConfig = require('../config/permissions');
+const { EmbedBuilder } = require('discord.js');
+const VISUALS = require('../config/visuals');
 
 /**
  * Executes a moderation action and logs it to the JSON filesystem.
@@ -29,16 +31,26 @@ const executeModAction = async (context, target, type, reason, options = {}) => 
     // 1. Advanced Granular Authorization Check
     const requiredPerms = permissionsConfig[type];
     if (requiredPerms && !context.member.permissions.has(requiredPerms)) {
-        const msg = `[UNAUTHORIZED] You lack the specific authority required for: ${type.toUpperCase()}.`;
-        return context.reply ? context.reply({ content: msg, ephemeral: true }) : context.channel.send(msg);
+        const embed = new EmbedBuilder()
+            .setTitle(`${VISUALS.emojis.security} Unauthorized Access`)
+            .setColor(VISUALS.colors.error)
+            .setDescription(`You lack the specific authority required for: \`${type.toUpperCase()}\`.`)
+            .setFooter({ text: VISUALS.footer.text });
+
+        return context.reply ? context.reply({ embeds: [embed], ephemeral: true }) : context.channel.send({ embeds: [embed] });
     }
 
     try {
         // 2. Target Hierarchy Check (if target is in guild)
         const targetMember = await guild.members.fetch(target.id).catch(() => null);
         if (targetMember && !targetMember.manageable && type !== 'unban') {
-            const msg = `[HIERARCHY ERROR] Unable to ${type} ${target.tag}. Target has higher or equal role authority.`;
-            return context.reply ? context.reply({ content: msg, ephemeral: true }) : context.channel.send(msg);
+            const embed = new EmbedBuilder()
+                .setTitle(`${VISUALS.emojis.error} Hierarchy Conflict`)
+                .setColor(VISUALS.colors.error)
+                .setDescription(`Unable to perform \`${type}\` on **${target.tag}**. Target possesses higher or equal role authority.`)
+                .setFooter({ text: VISUALS.footer.text });
+
+            return context.reply ? context.reply({ embeds: [embed], ephemeral: true }) : context.channel.send({ embeds: [embed] });
         }
 
         // 3. Execute Discord API Action
@@ -46,6 +58,13 @@ const executeModAction = async (context, target, type, reason, options = {}) => 
         switch (type) {
             case 'ban':
                 await guild.members.ban(target.id, { reason });
+                break;
+            case 'kick':
+                if (targetMember) {
+                    await targetMember.kick(reason);
+                } else {
+                    actionResult = false;
+                }
                 break;
             case 'unban':
                 await guild.members.unban(target.id, reason);
@@ -64,8 +83,13 @@ const executeModAction = async (context, target, type, reason, options = {}) => 
         }
 
         if (!actionResult) {
-            const msg = `[EXECUTION ERROR] Target user is not in the guild; cannot perform ${type}.`;
-            return context.reply ? context.reply({ content: msg, ephemeral: true }) : context.channel.send(msg);
+            const embed = new EmbedBuilder()
+                .setTitle(`${VISUALS.emojis.error} Execution Halted`)
+                .setColor(VISUALS.colors.error)
+                .setDescription(`Target user is not currently in the guild; unable to perform \`${type}\`.`)
+                .setFooter({ text: VISUALS.footer.text });
+
+            return context.reply ? context.reply({ embeds: [embed], ephemeral: true }) : context.channel.send({ embeds: [embed] });
         }
 
         // 4. Log to JSON Pipeline
@@ -77,17 +101,55 @@ const executeModAction = async (context, target, type, reason, options = {}) => 
             metadata: options
         });
 
-        // 5. Visual Confirmation
-        const BOT_NAME = process.env.BOT_NAME || 'Vectra Mod (Template)';
-        const successMsg = `[SUCCESS] **${type.toUpperCase()}** executed on ${target.tag} (ID: ${target.id}). Reason: ${reason}`;
+        // 5. External Action Logging (Channels)
+        const kickBanChannelId = process.env.LOG_CHANNEL_KICK_BAN;
+        const modChannelId = process.env.LOG_CHANNEL_MOD;
+
+        const logEmbed = new EmbedBuilder()
+            .setTitle(`${VISUALS.emojis.infraction} System Action: ${type.toUpperCase()}`)
+            .setColor(type === 'ban' || type === 'kick' ? VISUALS.colors.error : VISUALS.colors.warning)
+            .addFields(
+                { name: 'Target', value: `${target.tag} (\`${target.id}\`)`, inline: true },
+                { name: 'Moderator', value: `${moderator.tag} (\`${moderator.id}\`)`, inline: true },
+                { name: 'Reason', value: reason, inline: false }
+            )
+            .setTimestamp()
+            .setFooter({ text: `Vectra Infrastructure | sejed.dev` });
+
+        if (['ban', 'kick'].includes(type) && kickBanChannelId) {
+            const channel = await guild.channels.fetch(kickBanChannelId).catch(() => null);
+            if (channel) {
+                await channel.send({ content: '@here @everyone', embeds: [logEmbed] });
+            }
+        } else if (modChannelId) {
+            const channel = await guild.channels.fetch(modChannelId).catch(() => null);
+            if (channel) {
+                await channel.send({ embeds: [logEmbed] });
+            }
+        }
+
+        // 6. Visual Confirmation
+        const successEmbed = new EmbedBuilder()
+            .setTitle(`${VISUALS.emojis.success} Action Finalized`)
+            .setColor(VISUALS.colors.success)
+            .setDescription(`Successfully executed **${type.toUpperCase()}** on **${target.tag}**.`)
+            .addFields({ name: 'Contextual Reason', value: reason })
+            .setFooter({ text: VISUALS.footer.text })
+            .setTimestamp();
+
         console.log('\x1b[34m%s\x1b[0m', `[MODLOG] ${type.toUpperCase()} | Target: ${target.tag} | Mod: ${moderator.tag}`);
 
-        return context.reply ? context.reply({ content: successMsg, ephemeral: true }) : context.channel.send(successMsg);
+        return context.reply ? context.reply({ embeds: [successEmbed], ephemeral: true }) : context.channel.send({ embeds: [successEmbed] });
 
     } catch (error) {
         console.error('\x1b[31m%s\x1b[0m', `[MOD ACTION ERROR] Execution failed for ${type} on ${target.id}:`, error.message);
-        const errorMsg = `[FATAL] Action failed: ${error.message}`;
-        return context.reply ? context.reply({ content: errorMsg, ephemeral: true }) : context.channel.send(errorMsg);
+        const errorEmbed = new EmbedBuilder()
+            .setTitle(`${VISUALS.emojis.error} System Failure`)
+            .setColor(VISUALS.colors.error)
+            .setDescription(`An internal error occurred while executing \`${type}\`: \`${error.message}\``)
+            .setFooter({ text: VISUALS.footer.text });
+
+        return context.reply ? context.reply({ embeds: [errorEmbed], ephemeral: true }) : context.channel.send({ embeds: [errorEmbed] });
     }
 };
 

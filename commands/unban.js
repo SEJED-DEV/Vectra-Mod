@@ -9,6 +9,8 @@
 
 const { resolveUser } = require('../utils/userResolver');
 const { executeModAction } = require('../utils/modActions');
+const { EmbedBuilder } = require('discord.js');
+const VISUALS = require('../config/visuals');
 
 module.exports = {
     name: 'unban',
@@ -20,7 +22,12 @@ module.exports = {
 
         const target = await resolveUser(client, targetQuery);
         if (!target) {
-            return message.channel.send('[ERROR] Unable to resolve target user. Provide a valid Snowflake ID.');
+            const errorEmbed = new EmbedBuilder()
+                .setTitle(`${VISUALS.emojis.error} Resolution Error`)
+                .setColor(VISUALS.colors.error)
+                .setDescription('Unable to resolve target user. Provide a valid Snowflake ID.')
+                .setFooter({ text: VISUALS.footer.text });
+            return message.channel.send({ embeds: [errorEmbed] });
         }
 
         await executeModAction(message, target, 'unban', reason);

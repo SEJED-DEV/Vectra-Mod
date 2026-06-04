@@ -25,6 +25,7 @@ const { executeModAction } = require('./utils/modActions');
 const { getUserLogs } = require('./utils/jsonLogger');
 const { resolveUser } = require('./utils/userResolver');
 const PERMISSIONS = require('./config/permissions');
+const VISUALS = require('./config/visuals');
 
 const client = new Client({
     intents: [
@@ -35,8 +36,9 @@ const client = new Client({
     ]
 });
 
-// Dynamic Configuration: Externalize Bot Name
+// Dynamic Configuration: Externalize Bot Name and Prefix
 const BOT_NAME = process.env.BOT_NAME || 'Vectra Mod (Template)';
+const COMMAND_PREFIX = process.env.COMMAND_PREFIX || '!';
 
 // Initialize Command Collection
 client.commands = new Collection();
@@ -88,9 +90,9 @@ client.once('ready', async () => {
 
 // Standalone Text Command Handler
 client.on('messageCreate', async (message) => {
-    if (message.author.bot || !message.content.startsWith('!')) return;
+    if (message.author.bot || !message.content.startsWith(COMMAND_PREFIX)) return;
 
-    const args = message.content.slice(1).trim().split(/ +/);
+    const args = message.content.slice(COMMAND_PREFIX.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
 
     const command = client.commands.get(commandName);
@@ -100,7 +102,12 @@ client.on('messageCreate', async (message) => {
         await command.execute(message, args);
     } catch (error) {
         console.error('\x1b[31m%s\x1b[0m', `[COMMAND ERROR] Failed to execute ${commandName}:`, error);
-        message.reply('[ERROR] An internal error occurred while processing this command.');
+        const errorEmbed = new EmbedBuilder()
+            .setTitle(`${VISUALS.emojis.error} Execution Error`)
+            .setColor(VISUALS.colors.error)
+            .setDescription(`An internal error occurred while processing the \`${commandName}\` command.`)
+            .setFooter({ text: VISUALS.footer.text });
+        message.reply({ embeds: [errorEmbed] });
     }
 });
 
@@ -137,11 +144,23 @@ client.on('interactionCreate', async (interaction) => {
 
         if (prefix === 'mod') {
             const target = await client.users.fetch(targetId).catch(() => null);
-            if (!target) return interaction.reply({ content: '[ERROR] Target no longer exists.', ephemeral: true });
+            if (!target) {
+                const errorEmbed = new EmbedBuilder()
+                    .setTitle(`${VISUALS.emojis.error} Reference Error`)
+                    .setColor(VISUALS.colors.error)
+                    .setDescription('Target user no longer exists or is invalid.')
+                    .setFooter({ text: VISUALS.footer.text });
+                return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+            }
 
             if (action === 'logs') {
                 if (!interaction.member.permissions.has(PERMISSIONS.viewLogs)) {
-                    return interaction.reply({ content: '[SECURITY] You lack the `ModerateMembers` permission to view logs.', ephemeral: true });
+                    const securityEmbed = new EmbedBuilder()
+                        .setTitle(`${VISUALS.emojis.security} Unauthorized Access`)
+                        .setColor(VISUALS.colors.error)
+                        .setDescription('You lack the `ModerateMembers` permission to view logs.')
+                        .setFooter({ text: VISUALS.footer.text });
+                    return interaction.reply({ embeds: [securityEmbed], ephemeral: true });
                 }
                 try {
                     const logs = getUserLogs(target.id);
@@ -152,7 +171,12 @@ client.on('interactionCreate', async (interaction) => {
                         .setFooter({ text: `${BOT_NAME} | sejed.dev` });
                     return interaction.reply({ embeds: [embed], ephemeral: true });
                 } catch (e) {
-                    return interaction.reply({ content: '[ERROR] JSON query failed.', ephemeral: true });
+                    const errorEmbed = new EmbedBuilder()
+                        .setTitle(`${VISUALS.emojis.error} Query Failure`)
+                        .setColor(VISUALS.colors.error)
+                        .setDescription('The JSON storage pipeline failed to retrieve records.')
+                        .setFooter({ text: VISUALS.footer.text });
+                    return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
                 }
             }
 
@@ -172,12 +196,22 @@ client.on('interactionCreate', async (interaction) => {
 
         const target = await resolveUser(client, targetQuery);
         if (!target) {
-            return interaction.reply({ content: `[ERROR] Unable to resolve target for: ${targetQuery}`, ephemeral: true });
+            const errorEmbed = new EmbedBuilder()
+                .setTitle(`${VISUALS.emojis.error} Resolution Failure`)
+                .setColor(VISUALS.colors.error)
+                .setDescription(`Unable to resolve target for: \`${targetQuery}\`. Ensure the ID or Username is correct.`)
+                .setFooter({ text: VISUALS.footer.text });
+            return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
         }
 
         if (action === 'logs') {
             if (!interaction.member.permissions.has(PERMISSIONS.viewLogs)) {
-                return interaction.reply({ content: '[SECURITY] You lack the `ModerateMembers` permission to view logs.', ephemeral: true });
+                const securityEmbed = new EmbedBuilder()
+                    .setTitle(`${VISUALS.emojis.security} Unauthorized Access`)
+                    .setColor(VISUALS.colors.error)
+                    .setDescription('You lack the `ModerateMembers` permission to view logs.')
+                    .setFooter({ text: VISUALS.footer.text });
+                return interaction.reply({ embeds: [securityEmbed], ephemeral: true });
             }
             try {
                 const logs = getUserLogs(target.id);
@@ -188,7 +222,12 @@ client.on('interactionCreate', async (interaction) => {
                     .setFooter({ text: `${BOT_NAME} | sejed.dev` });
                 return interaction.reply({ embeds: [embed], ephemeral: true });
             } catch (e) {
-                return interaction.reply({ content: '[ERROR] JSON query failed.', ephemeral: true });
+                const errorEmbed = new EmbedBuilder()
+                    .setTitle(`${VISUALS.emojis.error} Query Failure`)
+                    .setColor(VISUALS.colors.error)
+                    .setDescription('The JSON storage pipeline failed to retrieve records.')
+                    .setFooter({ text: VISUALS.footer.text });
+                return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
             }
         }
 

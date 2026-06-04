@@ -1,8 +1,8 @@
 /**
- * Vectra Mod (Template) - Mute Command
+ * Vectra Mod (Template) - Kick Command
  *
- * Standalone text command to timeout a user in the guild.
- * Defaults to 1 hour if no duration is specified.
+ * Standalone text command to kick a user from the guild.
+ * Utilizes the centralized modActions execution path.
  *
  * Authored by: sejed.dev (Support Contact: support@sejed.dev)
  */
@@ -13,24 +13,32 @@ const { EmbedBuilder } = require('discord.js');
 const VISUALS = require('../config/visuals');
 
 module.exports = {
-    name: 'mute',
-    description: 'Times out a user in the guild.',
+    name: 'kick',
+    description: 'Kicks a user from the guild.',
     execute: async (message, args) => {
         const client = message.client;
         const targetQuery = args[0];
         const reason = args.slice(1).join(' ') || 'No reason provided';
+
+        if (!targetQuery) {
+            const usageEmbed = new EmbedBuilder()
+                .setTitle(`${VISUALS.emojis.system} Command Usage`)
+                .setColor(VISUALS.colors.warning)
+                .setDescription('`!kick <user/id> [reason]`')
+                .setFooter({ text: VISUALS.footer.text });
+            return message.channel.send({ embeds: [usageEmbed] });
+        }
 
         const target = await resolveUser(client, targetQuery);
         if (!target) {
             const errorEmbed = new EmbedBuilder()
                 .setTitle(`${VISUALS.emojis.error} Resolution Error`)
                 .setColor(VISUALS.colors.error)
-                .setDescription('Unable to resolve target user. Provide a valid ID or Username.')
+                .setDescription('Unable to resolve target user.')
                 .setFooter({ text: VISUALS.footer.text });
             return message.channel.send({ embeds: [errorEmbed] });
         }
 
-        // Execution with default 1 hour duration (3600000 ms)
-        await executeModAction(message, target, 'mute', reason, { duration: 3600000 });
+        await executeModAction(message, target, 'kick', reason);
     }
 };

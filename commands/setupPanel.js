@@ -9,6 +9,7 @@
 
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
 const permissionsConfig = require('../config/permissions');
+const VISUALS = require('../config/visuals');
 
 module.exports = {
     name: 'setup-panel',
@@ -18,11 +19,16 @@ module.exports = {
 
         // Authorization Check for Setup
         if (!message.member.permissions.has(permissionsConfig.setupPanel)) {
-            return message.reply(`[UNAUTHORIZED] Only administrators can initialize the ${BOT_NAME} global hub.`);
+            const securityEmbed = new EmbedBuilder()
+                .setTitle(`${VISUALS.emojis.security} Unauthorized Access`)
+                .setColor(VISUALS.colors.error)
+                .setDescription(`Only administrators can initialize the ${BOT_NAME} global hub.`)
+                .setFooter({ text: VISUALS.footer.text });
+            return message.reply({ embeds: [securityEmbed] });
         }
 
         const embed = new EmbedBuilder()
-            .setTitle(`${BOT_NAME} // Persistent Moderation Hub`)
+            .setTitle(`${VISUALS.emojis.system} ${BOT_NAME} // Persistent Moderation Hub`)
             .setDescription('Global execution interface for staff members.\nClick an action below to open the input matrix.')
             .setColor(0x2B2D31)
             .setThumbnail(message.guild.iconURL())

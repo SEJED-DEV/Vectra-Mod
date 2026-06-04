@@ -8,6 +8,7 @@
 
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
 const { resolveUser } = require('../utils/userResolver');
+const VISUALS = require('../config/visuals');
 
 module.exports = {
     name: 'panel',
@@ -19,11 +20,16 @@ module.exports = {
 
         const target = await resolveUser(client, targetQuery);
         if (!target) {
-            return message.channel.send('[ERROR] Unable to resolve target user for panel initialization.');
+            const errorEmbed = new EmbedBuilder()
+                .setTitle(`${VISUALS.emojis.error} Initialization Error`)
+                .setColor(VISUALS.colors.error)
+                .setDescription('Unable to resolve target user for panel initialization.')
+                .setFooter({ text: VISUALS.footer.text });
+            return message.channel.send({ embeds: [errorEmbed] });
         }
 
         const embed = new EmbedBuilder()
-            .setTitle(`${BOT_NAME} Staff Panel`)
+            .setTitle(`${VISUALS.emojis.system} ${BOT_NAME} Staff Panel`)
             .setDescription(`Interactive moderation matrix for ${target} (ID: \`${target.id}\`).\nSelect an action below to execute with standard validation.`)
             .setColor(0x2B2D31)
             .setThumbnail(target.displayAvatarURL())
@@ -51,7 +57,7 @@ module.exports = {
             );
 
         return message.channel.send({
-            content: `[PANEL] Targeting: ${target}`,
+            content: `${VISUALS.emojis.system} **Terminal Targeting:** ${target}`,
             embeds: [embed],
             components: [row]
         });
