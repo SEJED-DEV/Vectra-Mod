@@ -1,5 +1,5 @@
 /**
- * Vectra Mod Documentation - Main Landing Page
+ * Vectra Mod (Template) Documentation - Main Landing Page
  *
  * Designed with a premium, high-end dark-themed infrastructure aesthetic.
  *
@@ -17,7 +17,7 @@ export default function Home() {
           VECTRA MOD
         </h1>
         <p className="text-xl md:text-2xl text-zinc-400 max-w-3xl mb-12">
-          Next-generation moderation infrastructure for high-concurrency environments.
+          Premium moderation infrastructure template for high-concurrency environments.
           Powered by MongoDB and Discord V2 Components.
         </p>
 
@@ -41,8 +41,8 @@ export default function Home() {
             <p className="text-zinc-400">High-performance staff control panels using Discord Action Rows and Button components.</p>
           </div>
           <div className="glass p-8">
-            <h3 className="text-xl font-bold mb-4">Premium Branding</h3>
-            <p className="text-zinc-400">Tailored terminal aesthetics and documentation authored by sejed.dev experts.</p>
+            <h3 className="text-xl font-bold mb-4">Custom Branding</h3>
+            <p className="text-zinc-400">Easily configure your bot identity via environment variables while maintaining premium aesthetics.</p>
           </div>
         </div>
       </main>

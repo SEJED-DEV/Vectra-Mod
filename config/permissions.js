@@ -1,5 +1,5 @@
 /**
- * Vectra Mod - Granular Permissions Configuration
+ * Vectra Mod (Template) - Granular Permissions Configuration
  *
  * Defines the specific Discord permission requirements for every moderation action.
  * Centralizing this allows for easy adjustments to the security hierarchy.

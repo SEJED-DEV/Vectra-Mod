@@ -1,5 +1,5 @@
 /**
- * Vectra Mod - Ban Command
+ * Vectra Mod (Template) - Ban Command
  *
  * Standalone text command to ban a user from the guild.
  * Records the action in the persistent MongoDB pipeline.

@@ -1,8 +1,7 @@
 /**
- * Vectra Mod - Staff Control Panel
+ * Vectra Mod (Template) - Staff Control Panel
  *
  * Generates an interactive message matrix for a target user using V2 UI components.
- * Directly pings the target user inline as per operational blueprint.
  *
  * Authored by: sejed.dev (Support Contact: support@sejed.dev)
  */
@@ -14,6 +13,7 @@ module.exports = {
     name: 'panel',
     description: 'Generates an interactive moderation panel for a user.',
     execute: async (message, args) => {
+        const BOT_NAME = process.env.BOT_NAME || 'Vectra Mod (Template)';
         const client = message.client;
         const targetQuery = args[0];
 
@@ -23,11 +23,11 @@ module.exports = {
         }
 
         const embed = new EmbedBuilder()
-            .setTitle('Staff Control Panel V2')
+            .setTitle(`${BOT_NAME} Staff Panel`)
             .setDescription(`Interactive moderation matrix for ${target} (ID: \`${target.id}\`).\nSelect an action below to execute with standard validation.`)
             .setColor(0x2B2D31)
             .setThumbnail(target.displayAvatarURL())
-            .setFooter({ text: 'Vectra Mod Execution Layer | sejed.dev' });
+            .setFooter({ text: `${BOT_NAME} Execution Layer | sejed.dev` });
 
         // Generate Action Row containing interactive buttons
         const row = new ActionRowBuilder()

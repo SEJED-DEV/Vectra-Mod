@@ -1,5 +1,5 @@
 /**
- * Vectra Mod - User Resolution Utility
+ * Vectra Mod (Template) - User Resolution Utility
  *
  * This utility resolves Discord users from either a Snowflake ID or a Username query string.
  * It is used across both text commands and interaction handlers.

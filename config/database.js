@@ -1,5 +1,5 @@
 /**
- * Vectra Mod - Database Configuration Layer
+ * Vectra Mod (Template) - Database Configuration Layer
  *
  * This module initializes the persistent connection to MongoDB using Mongoose.
  * It is designed for high-concurrency environments and implements established console branding.

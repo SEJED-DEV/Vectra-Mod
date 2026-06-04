@@ -1,5 +1,5 @@
 /**
- * Vectra Mod - Modlogs Command
+ * Vectra Mod (Template) - Modlogs Command
  *
  * Retrieves the moderation history for a specific user from MongoDB.
  * Displays infraction types, reasons, and timestamps.
@@ -16,6 +16,8 @@ module.exports = {
     name: 'modlogs',
     description: 'Retrieves moderation history for a user.',
     execute: async (message, args) => {
+        const BOT_NAME = process.env.BOT_NAME || 'Vectra Mod (Template)';
+
         // Advanced Permission Check for Log Access
         if (!message.member.permissions.has(permissionsConfig.viewLogs)) {
             return message.reply('[UNAUTHORIZED] You lack the authority to view sensitive moderation logs.');
@@ -43,7 +45,7 @@ module.exports = {
                 .setDescription(logs.map((log, index) => {
                     return `**${index + 1}. [${log.type.toUpperCase()}]** - ${log.reason}\n*Date: ${log.createdAt.toUTCString()}*`;
                 }).join('\n\n'))
-                .setFooter({ text: 'Vectra Mod Pipeline | sejed.dev' });
+                .setFooter({ text: `${BOT_NAME} Pipeline | sejed.dev` });
 
             return message.channel.send({ embeds: [embed] });
 

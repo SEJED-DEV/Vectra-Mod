@@ -1,5 +1,5 @@
 /**
- * Vectra Mod - Warn Command
+ * Vectra Mod (Template) - Warn Command
  *
  * Standalone text command to issue a formal warning to a user.
  * Records the infraction in the unified database pipeline.

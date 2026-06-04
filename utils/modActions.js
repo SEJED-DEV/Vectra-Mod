@@ -1,5 +1,5 @@
 /**
- * Vectra Mod - Shared Moderation Execution Logic
+ * Vectra Mod (Template) - Shared Moderation Execution Logic
  *
  * This module centralizes the execution paths for all moderation actions.
  * It ensures that both standalone commands and panel button interactions

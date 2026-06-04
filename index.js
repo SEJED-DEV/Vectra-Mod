@@ -1,5 +1,5 @@
 /**
- * Vectra Mod - Core Execution Engine
+ * Vectra Mod - Core Execution Engine (Template)
  *
  * Main entry point for the Discord bot. Handles command parsing,
  * interaction routing, and database initialization.
@@ -35,6 +35,9 @@ const client = new Client({
     ]
 });
 
+// Dynamic Configuration: Externalize Bot Name
+const BOT_NAME = process.env.BOT_NAME || 'Vectra Mod (Template)';
+
 // Initialize Command Collection
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
@@ -58,6 +61,7 @@ const displayConsoleBanner = () => {
 `;
     console.log('\x1b[35m%s\x1b[0m', banner);
     console.log('\x1b[36m%s\x1b[0m', '┌────────────────────────────────────────────────────────────────────────┐');
+    console.log('\x1b[36m%s\x1b[0m', `│ [SYSTEM] Bot Identity: ${BOT_NAME.padEnd(48)} │`);
     console.log('\x1b[36m%s\x1b[0m', '│ [SUPPORT] 👉 support@sejed.dev                                         │');
     console.log('\x1b[36m%s\x1b[0m', '│ [PROJECTS] \x1b[4mhttps://sejed.dev\x1b[0m                                        │');
     console.log('\x1b[36m%s\x1b[0m', '└────────────────────────────────────────────────────────────────────────┘');
@@ -71,7 +75,7 @@ client.once('ready', async () => {
     await connectDatabase();
 
     client.user.setPresence({
-        activities: [{ name: 'Over Staff Panel V2', type: ActivityType.Watching }],
+        activities: [{ name: `Over ${BOT_NAME} Staff Panel`, type: ActivityType.Watching }],
         status: 'online',
     });
     
@@ -106,7 +110,7 @@ client.on('interactionCreate', async (interaction) => {
         if (prefix === 'global') {
             const modal = new ModalBuilder()
                 .setCustomId(`modal_${action}`)
-                .setTitle(`Moderation: ${action.toUpperCase()}`);
+                .setTitle(`${BOT_NAME}: ${action.toUpperCase()}`);
 
             const targetInput = new TextInputBuilder()
                 .setCustomId('target_id')
@@ -141,7 +145,7 @@ client.on('interactionCreate', async (interaction) => {
                         .setTitle(`Moderation Logs: ${target.tag}`)
                         .setColor(0x5865F2)
                         .setDescription(logs.length ? logs.map(l => `**[${l.type.toUpperCase()}]** - ${l.reason}`).join('\n') : 'No records found.')
-                        .setFooter({ text: 'sejed.dev' });
+                        .setFooter({ text: `${BOT_NAME} | sejed.dev` });
                     return interaction.reply({ embeds: [embed], ephemeral: true });
                 } catch (e) {
                     return interaction.reply({ content: '[ERROR] Database query failed.', ephemeral: true });
@@ -150,7 +154,7 @@ client.on('interactionCreate', async (interaction) => {
 
             const actionMap = { 'warn': 'warn', 'mute': 'mute', 'ban': 'ban' };
             if (actionMap[action]) {
-                await executeModAction(interaction, target, actionMap[action], 'Executed via Staff Control Panel V2', action === 'mute' ? { duration: 3600000 } : {});
+                await executeModAction(interaction, target, actionMap[action], `Executed via ${BOT_NAME} Staff Control Panel`, action === 'mute' ? { duration: 3600000 } : {});
             }
         }
     }
@@ -175,7 +179,7 @@ client.on('interactionCreate', async (interaction) => {
                     .setTitle(`Moderation Logs: ${target.tag}`)
                     .setColor(0x5865F2)
                     .setDescription(logs.length ? logs.map(l => `**[${l.type.toUpperCase()}]** - ${l.reason}`).join('\n') : 'No records found.')
-                    .setFooter({ text: 'sejed.dev' });
+                    .setFooter({ text: `${BOT_NAME} | sejed.dev` });
                 return interaction.reply({ embeds: [embed], ephemeral: true });
             } catch (e) {
                 return interaction.reply({ content: '[ERROR] Database query failed.', ephemeral: true });

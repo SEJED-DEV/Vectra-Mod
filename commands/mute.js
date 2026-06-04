@@ -1,5 +1,5 @@
 /**
- * Vectra Mod - Mute Command
+ * Vectra Mod (Template) - Mute Command
  *
  * Standalone text command to timeout a user in the guild.
  * Defaults to 1 hour if no duration is specified.

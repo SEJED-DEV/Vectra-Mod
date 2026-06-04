@@ -1,5 +1,5 @@
 /**
- * Vectra Mod - Documentation Hub
+ * Vectra Mod (Template) - Documentation Hub
  *
  * Provides comprehensive technical details on deployment, commands, and panel integration.
  *
@@ -18,9 +18,9 @@ export default function DocsPage() {
         <section className="mb-16">
           <h2 className="text-3xl font-bold mb-6 text-indigo-400">1. Deployment Steps</h2>
           <div className="glass p-6 space-y-4 text-zinc-300">
-            <p>To initialize the Vectra Mod environment, follow these steps:</p>
+            <p>To initialize the infrastructure environment, follow these steps:</p>
             <ol className="list-decimal list-inside space-y-2">
-              <li>Configure <code>.env</code> with <code>DISCORD_TOKEN</code> and <code>MONGODB_URI</code>.</li>
+              <li>Configure <code>.env</code> with <code>DISCORD_TOKEN</code>, <code>MONGODB_URI</code>, and <code>BOT_NAME</code>.</li>
               <li>Execute <code>npm install</code> to synchronize dependencies.</li>
               <li>Run <code>node index.js</code> to trigger the visual banner and authentication loop.</li>
             </ol>
@@ -67,7 +67,7 @@ export default function DocsPage() {
         <section className="mb-16">
           <h2 className="text-3xl font-bold mb-6 text-indigo-400">3. Staff Panel Integration</h2>
           <p className="text-zinc-400 mb-6">
-            Vectra Mod features two distinct interaction layers:
+            The infrastructure features two distinct interaction layers:
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="glass p-6">
@@ -90,7 +90,7 @@ export default function DocsPage() {
         <section className="mb-16">
           <h2 className="text-3xl font-bold mb-6 text-indigo-400">4. Advanced Permissions</h2>
           <p className="text-zinc-400 mb-4">
-            Vectra Mod implements a granular security hierarchy defined in <code>config/permissions.js</code>.
+            The system implements a granular security hierarchy defined in <code>config/permissions.js</code>.
           </p>
           <ul className="list-disc list-inside space-y-2 text-zinc-400">
             <li><strong>Moderate Members:</strong> Required for Warnings, Mutes, and Log Access.</li>

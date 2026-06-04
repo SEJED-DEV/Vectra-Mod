@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Vectra Mod Documentation",
+  title: "Vectra Mod (Template) Documentation",
   description: "Next-generation moderation infrastructure for high-concurrency environments.",
 };
 

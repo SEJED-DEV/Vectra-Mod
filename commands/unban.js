@@ -1,5 +1,5 @@
 /**
- * Vectra Mod - Unban Command
+ * Vectra Mod (Template) - Unban Command
  *
  * Standalone text command to remove a ban from a user.
  * Requires the target's Snowflake ID if they are not in the cache.

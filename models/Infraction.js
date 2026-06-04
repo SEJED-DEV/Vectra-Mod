@@ -1,5 +1,5 @@
 /**
- * Vectra Mod - Unified Infraction Schema
+ * Vectra Mod (Template) - Unified Infraction Schema
  *
  * This model defines the structure for recording tracking info for all moderation actions.
  * It serves as a single source of truth for high-concurrency database architecture.
