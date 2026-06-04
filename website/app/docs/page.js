@@ -8,101 +8,146 @@
 
 export default function DocsPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      <nav className="border-b border-white/5 p-6 flex justify-between items-center">
-        <span className="font-bold tracking-widest">VECTRA // DOCS</span>
-        <a href="/" className="text-sm text-zinc-400 hover:text-white transition-all">Back to Home</a>
+    <div className="min-h-screen bg-[#0a0a0a] text-white font-sans">
+      <nav className="border-b border-white/5 p-8 flex justify-between items-center glass sticky top-0 z-50">
+        <div className="flex items-center gap-4">
+          <div className="w-8 h-8 bg-indigo-500 rounded flex items-center justify-center font-bold">V</div>
+          <span className="font-bold tracking-widest text-lg">VECTRA // ARCHITECTURE</span>
+        </div>
+        <a href="/" className="text-sm text-zinc-400 hover:text-white transition-all bg-white/5 px-4 py-2 rounded-lg">Back to Home</a>
       </nav>
 
-      <main className="max-w-4xl mx-auto px-6 py-16">
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-6 text-indigo-400">1. Deployment Steps</h2>
-          <div className="glass p-6 space-y-4 text-zinc-300">
-            <p>To initialize the infrastructure environment, follow these steps:</p>
-            <ol className="list-decimal list-inside space-y-2">
-              <li>Configure <code>.env</code> with <code>DISCORD_TOKEN</code>, <code>MONGODB_URI</code>, and <code>BOT_NAME</code>.</li>
-              <li>Execute <code>npm install</code> to synchronize dependencies.</li>
-              <li>Run <code>node index.js</code> to trigger the visual banner and authentication loop.</li>
-            </ol>
+      <main className="max-w-5xl mx-auto px-8 py-24">
+        {/* Intro */}
+        <section className="mb-24">
+          <h1 className="text-5xl font-black mb-6">Technical Specification</h1>
+          <p className="text-xl text-zinc-400 leading-relaxed max-w-3xl">
+            Vectra Mod utilizes a custom-engineered JSON flat-file storage pipeline to provide lightning-fast,
+            zero-latency moderation logging without the overhead of external database clusters.
+          </p>
+        </section>
+
+        {/* 1. Deployment */}
+        <section className="mb-24">
+          <div className="flex items-center gap-4 mb-8">
+            <span className="text-4xl font-black text-indigo-500/20">01</span>
+            <h2 className="text-4xl font-bold">Deployment Lifecycle</h2>
+          </div>
+          <div className="glass p-10 space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+              <div>
+                <h4 className="text-white font-bold mb-4 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-indigo-500 text-[10px] flex items-center justify-center">1</span>
+                  Environment Configuration
+                </h4>
+                <p className="text-zinc-400 text-sm leading-relaxed">
+                  Populate the <code>.env</code> file in the root directory. This version of the template requires
+                  <code>DISCORD_TOKEN</code> and <code>BOT_NAME</code>. The MongoDB requirement has been deprecated
+                  in favor of local persistence.
+                </p>
+              </div>
+              <div>
+                <h4 className="text-white font-bold mb-4 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-indigo-500 text-[10px] flex items-center justify-center">2</span>
+                  Dependency Synchronization
+                </h4>
+                <p className="text-zinc-400 text-sm leading-relaxed">
+                  Execute <code>npm install</code>. The bot core is optimized for minimal dependencies, relying
+                  primarily on <code>discord.js</code> and <code>dotenv</code>.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-6 text-indigo-400">2. Command Schemas</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left glass">
-              <thead className="border-b border-white/10">
+        {/* 2. Command Schemas */}
+        <section className="mb-24">
+          <div className="flex items-center gap-4 mb-8">
+            <span className="text-4xl font-black text-indigo-500/20">02</span>
+            <h2 className="text-4xl font-bold">Core Command Suite</h2>
+          </div>
+          <div className="overflow-hidden glass">
+            <table className="w-full text-left">
+              <thead className="bg-white/5 border-b border-white/10">
                 <tr>
-                  <th className="p-4">Command</th>
-                  <th className="p-4">Target</th>
-                  <th className="p-4">Function</th>
+                  <th className="p-6 text-indigo-400 text-sm font-mono">COMMAND</th>
+                  <th className="p-6 text-indigo-400 text-sm font-mono">PARAMETERS</th>
+                  <th className="p-6 text-indigo-400 text-sm font-mono">EXECUTION PATH</th>
                 </tr>
               </thead>
-              <tbody className="text-zinc-400">
-                <tr className="border-b border-white/5">
-                  <td className="p-4 font-mono text-white">!warn</td>
-                  <td className="p-4">ID/Username</td>
-                  <td className="p-4">Logs a formal warning to DB.</td>
+              <tbody className="text-zinc-300">
+                <tr className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                  <td className="p-6 font-mono text-white italic">!warn</td>
+                  <td className="p-6">ID/User + Reason</td>
+                  <td className="p-6">Writes to <code>warns.json</code></td>
                 </tr>
-                <tr className="border-b border-white/5">
-                  <td className="p-4 font-mono text-white">!mute</td>
-                  <td className="p-4">ID/Username</td>
-                  <td className="p-4">Executes a timed-out state.</td>
+                <tr className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                  <td className="p-6 font-mono text-white italic">!mute</td>
+                  <td className="p-6">ID/User + Reason</td>
+                  <td className="p-6">Writes to <code>mutes.json</code></td>
                 </tr>
-                <tr className="border-b border-white/5">
-                  <td className="p-4 font-mono text-white">!ban</td>
-                  <td className="p-4">ID/Username</td>
-                  <td className="p-4">Permanent expulsion from guild.</td>
+                <tr className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                  <td className="p-6 font-mono text-white italic">!ban</td>
+                  <td className="p-6">ID/User + Reason</td>
+                  <td className="p-6">Writes to <code>bans.json</code></td>
                 </tr>
-                <tr className="border-b border-white/5">
-                  <td className="p-4 font-mono text-white">!setup-panel</td>
-                  <td className="p-4">None</td>
-                  <td className="p-4">Initializes global moderation hub.</td>
+                <tr className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                  <td className="p-6 font-mono text-white italic">!modlogs</td>
+                  <td className="p-6">ID/User</td>
+                  <td className="p-6">Aggregates user JSON logs</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </section>
 
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-6 text-indigo-400">3. Staff Panel Integration</h2>
-          <p className="text-zinc-400 mb-6">
-            The infrastructure features two distinct interaction layers:
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="glass p-6">
-              <h4 className="font-bold text-white mb-2">Direct Panel</h4>
-              <p className="text-sm text-zinc-400">Triggered via <code>!panel &lt;user&gt;</code> for immediate, target-specific actions.</p>
-            </div>
-            <div className="glass p-6">
-              <h4 className="font-bold text-white mb-2">Global Hub</h4>
-              <p className="text-sm text-zinc-400">A persistent message matrix that uses Modals to collect user input globally.</p>
-            </div>
+        {/* 3. Storage Architecture */}
+        <section className="mb-24">
+          <div className="flex items-center gap-4 mb-8">
+            <span className="text-4xl font-black text-indigo-500/20">03</span>
+            <h2 className="text-4xl font-bold">Logging Infrastructure</h2>
           </div>
-          <div className="bg-indigo-500/10 border-l-4 border-indigo-500 p-6">
-            <h4 className="font-bold text-white mb-2">Interaction Routing:</h4>
-            <p className="text-sm text-zinc-300">
-              Both layers route through the same <code>modActions</code> execution path, ensuring absolute parity in validation.
+          <div className="glass p-10 border-l-4 border-indigo-500">
+            <h4 className="text-2xl font-bold mb-6">Atomic JSON Storage</h4>
+            <p className="text-zinc-400 leading-relaxed mb-8">
+              Instead of a monolithic database, Vectra Mod utilizes an atomic file-system approach.
+              Each user has a dedicated directory within the <code>Logs/</code> folder, ensuring that
+              read/write operations are isolated and extremely fast.
             </p>
+            <div className="bg-black/40 p-6 rounded-lg font-mono text-sm text-indigo-300">
+              <div className="mb-1">Logs/</div>
+              <div className="ml-4 mb-1 text-zinc-500">└── user_123456789/</div>
+              <div className="ml-8 mb-1">├── warns.json</div>
+              <div className="ml-8 mb-1">├── mutes.json</div>
+              <div className="ml-8">└── bans.json</div>
+            </div>
           </div>
         </section>
 
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-6 text-indigo-400">4. Advanced Permissions</h2>
-          <p className="text-zinc-400 mb-4">
-            The system implements a granular security hierarchy defined in <code>config/permissions.js</code>.
-          </p>
-          <ul className="list-disc list-inside space-y-2 text-zinc-400">
-            <li><strong>Moderate Members:</strong> Required for Warnings, Mutes, and Log Access.</li>
-            <li><strong>Ban Members:</strong> Required for Bans and Unbans.</li>
-            <li><strong>Administrator:</strong> Required for Hub Initialization (<code>!setup-panel</code>).</li>
-            <li><strong>Hierarchy Validation:</strong> Automatic protection against actions on users with equal or higher roles.</li>
-          </ul>
+        {/* 4. Permissions */}
+        <section className="mb-24">
+          <div className="flex items-center gap-4 mb-8">
+            <span className="text-4xl font-black text-indigo-500/20">04</span>
+            <h2 className="text-4xl font-bold">Advanced Permission Grid</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="glass p-8">
+              <h5 className="font-bold mb-4 text-indigo-400">STAFF_LEVEL_01</h5>
+              <p className="text-sm text-zinc-400 mb-2">Permissions: <code>ModerateMembers</code></p>
+              <p className="text-xs text-zinc-500 italic">Actions: Warning, Muting, View Logs</p>
+            </div>
+            <div className="glass p-8">
+              <h5 className="font-bold mb-4 text-red-400">STAFF_LEVEL_02</h5>
+              <p className="text-sm text-zinc-400 mb-2">Permissions: <code>BanMembers</code></p>
+              <p className="text-xs text-zinc-500 italic">Actions: Banning, Unbanning</p>
+            </div>
+          </div>
         </section>
       </main>
 
-      <footer className="p-12 text-center text-zinc-600 border-t border-white/5">
-        Technical Architecture Handover by sejed.dev | support@sejed.dev
+      <footer className="p-20 text-center text-zinc-600 border-t border-white/5">
+        Premium Technical Architecture Handover by <span className="text-white font-bold">sejed.dev</span>
+        <div className="mt-4 text-xs">Support: support@sejed.dev</div>
       </footer>
     </div>
   );

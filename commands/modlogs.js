@@ -1,14 +1,14 @@
 /**
  * Vectra Mod (Template) - Modlogs Command
  *
- * Retrieves the moderation history for a specific user from MongoDB.
- * Displays infraction types, reasons, and timestamps.
+ * Retrieves the moderation history for a specific user from the JSON filesystem.
+ * Aggregates all action types into a unified chronological display.
  *
  * Authored by: sejed.dev (Support Contact: support@sejed.dev)
  */
 
 const { resolveUser } = require('../utils/userResolver');
-const Infraction = require('../models/Infraction');
+const { getUserLogs } = require('../utils/jsonLogger');
 const { EmbedBuilder } = require('discord.js');
 const permissionsConfig = require('../config/permissions');
 
@@ -32,26 +32,27 @@ module.exports = {
         }
 
         try {
-            const logs = await Infraction.find({ targetId: target.id }).sort({ createdAt: -1 }).limit(10);
+            // Retrieve aggregated logs from the JSON storage pipeline
+            const logs = getUserLogs(target.id);
 
             if (logs.length === 0) {
                 return message.channel.send(`[INFO] No moderation records found for **${target.tag}**.`);
             }
 
             const embed = new EmbedBuilder()
-                .setTitle(`Moderation Logs: ${target.tag}`)
+                .setTitle(`Moderation History: ${target.tag}`)
                 .setColor(0x5865F2)
                 .setThumbnail(target.displayAvatarURL())
-                .setDescription(logs.map((log, index) => {
-                    return `**${index + 1}. [${log.type.toUpperCase()}]** - ${log.reason}\n*Date: ${log.createdAt.toUTCString()}*`;
+                .setDescription(logs.slice(0, 10).map((log, index) => {
+                    return `**${index + 1}. [${log.type.toUpperCase()}]** - ${log.reason}\n*Executed by: ${log.moderatorTag}*\n*Date: ${new Date(log.epoch).toUTCString()}*`;
                 }).join('\n\n'))
-                .setFooter({ text: `${BOT_NAME} Pipeline | sejed.dev` });
+                .setFooter({ text: `${BOT_NAME} File-System Logging | sejed.dev` });
 
             return message.channel.send({ embeds: [embed] });
 
         } catch (error) {
             console.error('\x1b[31m%s\x1b[0m', `[MODLOGS ERROR] Failed to fetch logs for ${target.id}:`, error.message);
-            return message.channel.send('[FATAL] Failed to retrieve logs from database.');
+            return message.channel.send('[FATAL] Failed to retrieve logs from JSON pipeline.');
         }
     }
 };

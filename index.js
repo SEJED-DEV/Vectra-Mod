@@ -1,8 +1,8 @@
 /**
- * Vectra Mod - Core Execution Engine (Template)
+ * Vectra Mod (Template) - Core Execution Engine
  *
  * Main entry point for the Discord bot. Handles command parsing,
- * interaction routing, and database initialization.
+ * interaction routing, and file-system initialization.
  *
  * Authored by: sejed.dev (Support Contact: support@sejed.dev)
  */
@@ -19,12 +19,12 @@ const {
     ActionRowBuilder,
     EmbedBuilder
 } = require('discord.js');
-const { connectDatabase } = require('./config/database');
 const fs = require('fs');
 const path = require('path');
 const { executeModAction } = require('./utils/modActions');
-const Infraction = require('./models/Infraction');
+const { getUserLogs } = require('./utils/jsonLogger');
 const { resolveUser } = require('./utils/userResolver');
+const PERMISSIONS = require('./config/permissions');
 
 const client = new Client({
     intents: [
@@ -49,6 +49,11 @@ for (const file of commandFiles) {
     client.commands.set(command.name, command);
 }
 
+// Ensure Logs directory exists
+if (!fs.existsSync(path.join(__dirname, 'Logs'))) {
+    fs.mkdirSync(path.join(__dirname, 'Logs'));
+}
+
 // Structural console branding banner designed with precise box-drawing elements
 const displayConsoleBanner = () => {
     const banner = `
@@ -62,6 +67,7 @@ const displayConsoleBanner = () => {
     console.log('\x1b[35m%s\x1b[0m', banner);
     console.log('\x1b[36m%s\x1b[0m', '┌────────────────────────────────────────────────────────────────────────┐');
     console.log('\x1b[36m%s\x1b[0m', `│ [SYSTEM] Bot Identity: ${BOT_NAME.padEnd(48)} │`);
+    console.log('\x1b[36m%s\x1b[0m', '│ [STORAGE] Pipeline: JSON Flat-File System                              │');
     console.log('\x1b[36m%s\x1b[0m', '│ [SUPPORT] 👉 support@sejed.dev                                         │');
     console.log('\x1b[36m%s\x1b[0m', '│ [PROJECTS] \x1b[4mhttps://sejed.dev\x1b[0m                                        │');
     console.log('\x1b[36m%s\x1b[0m', '└────────────────────────────────────────────────────────────────────────┘');
@@ -72,8 +78,6 @@ client.once('ready', async () => {
     displayConsoleBanner();
     console.log('\x1b[32m%s\x1b[0m', `[CORE] Secure connection initialized. Authenticated as: ${client.user.tag}`);
     
-    await connectDatabase();
-
     client.user.setPresence({
         activities: [{ name: `Over ${BOT_NAME} Staff Panel`, type: ActivityType.Watching }],
         status: 'online',
@@ -102,11 +106,9 @@ client.on('messageCreate', async (message) => {
 
 // Interactive Panel Interaction Handler
 client.on('interactionCreate', async (interaction) => {
-    // 1. Handle Button Clicks
     if (interaction.isButton()) {
         const [prefix, action, targetId] = interaction.customId.split('_');
 
-        // Handle Global Panel Buttons (triggering modals)
         if (prefix === 'global') {
             const modal = new ModalBuilder()
                 .setCustomId(`modal_${action}`)
@@ -133,22 +135,24 @@ client.on('interactionCreate', async (interaction) => {
             return await interaction.showModal(modal);
         }
 
-        // Handle Per-User Panel Buttons (direct execution)
         if (prefix === 'mod') {
             const target = await client.users.fetch(targetId).catch(() => null);
             if (!target) return interaction.reply({ content: '[ERROR] Target no longer exists.', ephemeral: true });
 
             if (action === 'logs') {
+                if (!interaction.member.permissions.has(PERMISSIONS.viewLogs)) {
+                    return interaction.reply({ content: '[SECURITY] You lack the `ModerateMembers` permission to view logs.', ephemeral: true });
+                }
                 try {
-                    const logs = await Infraction.find({ targetId: target.id }).sort({ createdAt: -1 }).limit(10);
+                    const logs = getUserLogs(target.id);
                     const embed = new EmbedBuilder()
                         .setTitle(`Moderation Logs: ${target.tag}`)
                         .setColor(0x5865F2)
-                        .setDescription(logs.length ? logs.map(l => `**[${l.type.toUpperCase()}]** - ${l.reason}`).join('\n') : 'No records found.')
+                        .setDescription(logs.length ? logs.slice(0, 10).map(l => `**[${l.type.toUpperCase()}]** - ${l.reason}`).join('\n') : 'No records found.')
                         .setFooter({ text: `${BOT_NAME} | sejed.dev` });
                     return interaction.reply({ embeds: [embed], ephemeral: true });
                 } catch (e) {
-                    return interaction.reply({ content: '[ERROR] Database query failed.', ephemeral: true });
+                    return interaction.reply({ content: '[ERROR] JSON query failed.', ephemeral: true });
                 }
             }
 
@@ -159,7 +163,6 @@ client.on('interactionCreate', async (interaction) => {
         }
     }
 
-    // 2. Handle Modal Submissions
     if (interaction.isModalSubmit()) {
         const [prefix, action] = interaction.customId.split('_');
         if (prefix !== 'modal') return;
@@ -173,16 +176,19 @@ client.on('interactionCreate', async (interaction) => {
         }
 
         if (action === 'logs') {
+            if (!interaction.member.permissions.has(PERMISSIONS.viewLogs)) {
+                return interaction.reply({ content: '[SECURITY] You lack the `ModerateMembers` permission to view logs.', ephemeral: true });
+            }
             try {
-                const logs = await Infraction.find({ targetId: target.id }).sort({ createdAt: -1 }).limit(10);
+                const logs = getUserLogs(target.id);
                 const embed = new EmbedBuilder()
                     .setTitle(`Moderation Logs: ${target.tag}`)
                     .setColor(0x5865F2)
-                    .setDescription(logs.length ? logs.map(l => `**[${l.type.toUpperCase()}]** - ${l.reason}`).join('\n') : 'No records found.')
+                    .setDescription(logs.length ? logs.slice(0, 10).map(l => `**[${l.type.toUpperCase()}]** - ${l.reason}`).join('\n') : 'No records found.')
                     .setFooter({ text: `${BOT_NAME} | sejed.dev` });
                 return interaction.reply({ embeds: [embed], ephemeral: true });
             } catch (e) {
-                return interaction.reply({ content: '[ERROR] Database query failed.', ephemeral: true });
+                return interaction.reply({ content: '[ERROR] JSON query failed.', ephemeral: true });
             }
         }
 

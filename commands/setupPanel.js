@@ -27,7 +27,7 @@ module.exports = {
             .setColor(0x2B2D31)
             .setThumbnail(message.guild.iconURL())
             .addFields(
-                { name: 'Security Protocol', value: 'All actions are logged to the MongoDB pipeline and require individual granular permissions.', inline: false }
+                { name: 'Security Protocol', value: 'All actions are logged to the JSON infrastructure and require individual granular permissions.', inline: false }
             )
             .setFooter({ text: `${BOT_NAME} Infrastructure | sejed.dev` });
 

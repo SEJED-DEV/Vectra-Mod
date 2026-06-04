@@ -5,14 +5,16 @@
  * It ensures that both standalone commands and panel button interactions
  * share the exact same validation, authorization checks, and execution paths.
  *
+ * Now migrated to high-performance JSON flat-file storage.
+ *
  * Authored by: sejed.dev (Support Contact: support@sejed.dev)
  */
 
-const Infraction = require('../models/Infraction');
+const { logInfraction } = require('./jsonLogger');
 const permissionsConfig = require('../config/permissions');
 
 /**
- * Executes a moderation action and logs it to the database.
+ * Executes a moderation action and logs it to the JSON filesystem.
  *
  * @param {Object} context - Execution context (message or interaction)
  * @param {Object} target - The target User object
@@ -57,7 +59,6 @@ const executeModAction = async (context, target, type, reason, options = {}) => 
                 }
                 break;
             case 'warn':
-                // Warn is purely a database record + DM in this implementation
                 await target.send(`You have been warned in ${guild.name} for: ${reason}`).catch(() => null);
                 break;
         }
@@ -67,17 +68,17 @@ const executeModAction = async (context, target, type, reason, options = {}) => 
             return context.reply ? context.reply({ content: msg, ephemeral: true }) : context.channel.send(msg);
         }
 
-        // 4. Log to MongoDB Pipeline
-        const infraction = new Infraction({
-            targetId: target.id,
+        // 4. Log to JSON Pipeline
+        logInfraction(target.id, type, {
+            targetTag: target.tag,
             moderatorId: moderator.id,
-            type,
+            moderatorTag: moderator.tag,
             reason,
             metadata: options
         });
-        await infraction.save();
 
         // 5. Visual Confirmation
+        const BOT_NAME = process.env.BOT_NAME || 'Vectra Mod (Template)';
         const successMsg = `[SUCCESS] **${type.toUpperCase()}** executed on ${target.tag} (ID: ${target.id}). Reason: ${reason}`;
         console.log('\x1b[34m%s\x1b[0m', `[MODLOG] ${type.toUpperCase()} | Target: ${target.tag} | Mod: ${moderator.tag}`);
 
